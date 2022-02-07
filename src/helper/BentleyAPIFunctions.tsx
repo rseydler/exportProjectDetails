@@ -3,6 +3,50 @@ import * as Excel from 'exceljs';
 
 export class BentleyAPIFunctions{
 
+  public static async getUsersEmailFromGuid(userGuid:string, projectId:string, accessToken:any){
+    if(userGuid === null){
+        return "Check your issue!";
+    }
+    const response = await fetch(`https://api.bentley.com/projects/${projectId}/members/${userGuid}`, {
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': accessToken,
+              },
+        })
+        const data = await response;
+        if (data.status === 404)
+        {
+            //most likely a role, or use has been ejected :(
+            return "UNKNOWN";
+        }
+        
+        const json = await data.json();
+        if (json == null){
+          return "UNKNOWN";
+        }
+        if ("member" in json){
+          if (json.member === null){
+            return ("UNKNOWN");
+          }
+          if ("email" in json.member)
+          {
+              if (json.member.email.trim() === "")
+              {
+                  return ("UNKNOWN");
+              }
+              else{
+                  return (json.member.email);
+              }
+          }
+        }
+        else{
+            return ("UNKNOWN");
+        }
+
+}
+
+
   public static async getAllProjectsDataFull(){
     var looper=true;
     const accessToken = await (await AuthorizationClient.oidcClient.getAccessToken()).toTokenString();
@@ -20,9 +64,16 @@ export class BentleyAPIFunctions{
         const data = await response;
         const json = await data.json();
 
+        for (var i = 0; i < json.projects.length; i++){
+          json.projects[i].registeredBy = await this.getUsersEmailFromGuid(json.projects[i].registeredBy, json.projects[i].id, accessToken);
+          projectsData.push(json.projects[i]);
+        }
+
+        /*
         json.projects.forEach((project: any) => {
           projectsData.push(project);
         });
+        */
         //let see if we are continuing.
         try {
             if (json._links.next.href){
