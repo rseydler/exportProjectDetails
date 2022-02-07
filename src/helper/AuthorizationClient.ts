@@ -18,7 +18,7 @@ class AuthorizationClient {
     }
 
     const scope = "email openid profile organization imodels:read itwinjs projects:read users:read";
-    const clientId = "spa-BEQm30lKEAfvF0x9lhmVYC0Mv";
+    const clientId = "spa-spa-XWwTYeS5cZIJeM7C79hVVGOuE";
     const redirectUri = `${window.location.origin}/signin-callback`;
     const postSignoutRedirectUri = `${window.location.origin}/logout`;
 
