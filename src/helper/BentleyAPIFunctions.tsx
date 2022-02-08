@@ -69,7 +69,7 @@ export class BentleyAPIFunctions{
         const json = await data.json();
 
         for (var i = 0; i < json.projects.length; i++){
-          setLogger(`Extracting data.. < ${x} - Looking for owners email from ${json.projects[i].registeredBy}`);
+          setLogger(`Extracting data.. < ${x} - Looking for owners email from ${json.projects[i].registeredBy} - Row ${i}`);
           json.projects[i].registeredBy = await this.getUsersEmailFromGuid(json.projects[i].registeredBy, json.projects[i].id, accessToken, setLogger);
           projectsData.push(json.projects[i]);
         }
