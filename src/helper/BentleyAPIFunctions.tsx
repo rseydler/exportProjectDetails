@@ -3,7 +3,7 @@ import * as Excel from 'exceljs';
 
 export class BentleyAPIFunctions{
 
-  public static async getUsersEmailFromGuid(userGuid:string, projectId:string, accessToken:any){
+  public static async getUsersEmailFromGuid(userGuid:string, projectId:string, accessToken:any, setLogger:any){
     if(userGuid === null){
         return "Check your issue!";
     }
@@ -47,12 +47,16 @@ export class BentleyAPIFunctions{
 }
 
 
-  public static async getAllProjectsDataFull(){
+  public static async getAllProjectsDataFull(setLogger : any){
     var looper=true;
     const accessToken = await (await AuthorizationClient.oidcClient.getAccessToken()).toTokenString();
     var urlToQuery : string = `https://api.bentley.com/projects/?$top=1000`;
     const projectsData: any[] = [];
+    var x = 0;
     while (looper) {
+      x = x + 1000;
+      setLogger(`Extracting data.. < ${x}`);
+      
         const response = await fetch(urlToQuery, {
             mode: 'cors',
             headers: {
@@ -65,7 +69,8 @@ export class BentleyAPIFunctions{
         const json = await data.json();
 
         for (var i = 0; i < json.projects.length; i++){
-          json.projects[i].registeredBy = await this.getUsersEmailFromGuid(json.projects[i].registeredBy, json.projects[i].id, accessToken);
+          setLogger(`Extracting data.. < ${x} - Looking for owners email from ${json.projects[i].registeredBy}`);
+          json.projects[i].registeredBy = await this.getUsersEmailFromGuid(json.projects[i].registeredBy, json.projects[i].id, accessToken, setLogger);
           projectsData.push(json.projects[i]);
         }
 
@@ -79,6 +84,7 @@ export class BentleyAPIFunctions{
             if (json._links.next.href){
                 looper = true;
                 urlToQuery = json._links.next.href;
+                
                 //console.log("contURL", urlToQuery);
             }
         }
@@ -119,15 +125,17 @@ export class BentleyAPIFunctions{
     });
 }
 
-  public static exportProjectsToExcel(){
+  public static exportProjectsToExcel(setLogger :any){
   
     (async () => {
-      var allProjectData = await BentleyAPIFunctions.getAllProjectsDataFull();
+      setLogger(<h1>Grabbing project data...</h1>);
+      var allProjectData = await BentleyAPIFunctions.getAllProjectsDataFull(setLogger);
       const wb = new Excel.Workbook();
       var ws = wb.addWorksheet("projects");
       var currCol = 1;
       var currRow = 1
       for (var project in allProjectData){
+        setLogger(<h1>Looping throught projects...</h1>);
           for (var projData in allProjectData[project]){
               const proj = allProjectData[project];
               if("_links" in proj){
@@ -141,6 +149,7 @@ export class BentleyAPIFunctions{
           currCol = 1;
       }
       BentleyAPIFunctions.downloadExportedIssues(wb);
+      setLogger(<h1>Done</h1>);
       return undefined;
     })();
   }

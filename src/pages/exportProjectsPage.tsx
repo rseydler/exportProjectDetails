@@ -13,7 +13,7 @@ function ExportProjectsPage({isAuthorized }:PageStuff) {
  
     const info:JSX.Element[]= [];
     const working:JSX.Element[]= [];
-    info.push(<Button key="exportProjs" size="large" onClick={() => {setLogger(<h1>Please wait getting excel ready..</h1>); BentleyAPIFunctions.exportProjectsToExcel();}}>Export All Project Details to Excel</Button>); 
+    info.push(<Button key="exportProjs" size="large" onClick={() => {setLogger(<h1>Please wait getting excel ready..</h1>); BentleyAPIFunctions.exportProjectsToExcel(setLogger); }}>Export All Project Details to Excel</Button>); 
    return (
     <div>
       {info}
